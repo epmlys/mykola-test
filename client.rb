@@ -62,4 +62,3 @@ puts CloudHash::Client.get('prez')
 puts CloudHash::Client.get('vp')
 puts CloudHash::Client.set('kolka', 'Cool!')
 puts CloudHash::Client.get('kolka')
-
