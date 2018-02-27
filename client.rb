@@ -38,12 +38,16 @@ module CloudHash
 
         def self.request(string)
             # create new connection for each operation
-            @client = TCPSocket.new(host, port)
-            @client.write(string)
+            begin
+                @client = TCPSocket.new(host, port)
+            rescue Errno::ECONNREFUSED
+                puts "Can't reach the server #{host}:#{port}"
+                return
+            end
 
+            @client.write(string)
             # send EOF
             @client.close_write
-
             # get response
             @client.read
         end
