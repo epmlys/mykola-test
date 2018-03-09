@@ -11,7 +11,7 @@ ONE_KB = 1024  # bytes
 print 'Max connections: '
 p Socket::SOMAXCONN
 
-#Socket.tcp_server_loop(4481) do |connection|
+Socket.tcp_server_loop(4481) do |connection|
 #    print 'Class: '
 #    p connection.class
 #    print 'Fileno: '
@@ -21,15 +21,20 @@ p Socket::SOMAXCONN
 #    print 'Remote addr: '
 #    p connection.remote_address
 #
-#    begin
-#        while data = connection.readpartial(ONE_KB) do
-#            puts data
-#        end
-#    rescue EOFError
-#        print 'EOF!'
-#    end
-#    connection.close
-#end
+    loop do
+        begin
+            data = connection.read_nonblock(ONE_KB)
+            puts data
+        rescue Errno::EAGAIN
+            p IO.select([connection])
+            retry
+        rescue EOFError
+            print 'EOF!'
+            break
+        end
+    end
+    connection.close
+end
 
 # Cloud Hash server
 module CloudHash
@@ -69,5 +74,5 @@ module CloudHash
     end
 end
 
-server = CloudHash::Server.new(4481)
-server.start
+# server = CloudHash::Server.new(4481)
+# server.start

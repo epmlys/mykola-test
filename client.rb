@@ -18,8 +18,21 @@ require 'socket'
 #client = Socket.tcp('google.com', 80)
 
 # write to local server
-#client = TCPSocket.new('localhost', 4481)
-#client.write('Kolka is cool!')
+client = TCPSocket.new('localhost', 4481)
+payload = 'Kolka is cool!' * 10000
+
+begin
+    loop do
+        written = client.write_nonblock(payload)
+        break if written >= payload.size
+        payload.slice!(0, written)
+        IO.select(nil, [client])
+    end
+
+rescue Errno::EAGAIN
+    IO.select(nil, [client])
+    retry
+end
 #client.close
 
 module CloudHash
@@ -54,11 +67,11 @@ module CloudHash
     end
 end
 
-CloudHash::Client.host = 'localhost'
-CloudHash::Client.port = 4481
+# CloudHash::Client.host = 'localhost'
+# CloudHash::Client.port = 4481
 
-puts CloudHash::Client.set('prez', 'Trumph')
-puts CloudHash::Client.get('prez')
-puts CloudHash::Client.get('vp')
-puts CloudHash::Client.set('kolka', 'Cool!')
-puts CloudHash::Client.get('kolka')
+# puts CloudHash::Client.set('prez', 'Trumph')
+# puts CloudHash::Client.get('prez')
+# puts CloudHash::Client.get('vp')
+# puts CloudHash::Client.set('kolka', 'Cool!')
+# puts CloudHash::Client.get('kolka')
