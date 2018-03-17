@@ -1,7 +1,7 @@
 require 'socket'
 
 PORT_RANGE = 1..1024
-HOST = '192.168.31.1'
+HOST = '127.0.0.1'
 TIME_TO_WAIT = 5
 
 sockets = PORT_RANGE.map do |port|

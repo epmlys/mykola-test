@@ -18,51 +18,43 @@ require 'socket'
 #client = Socket.tcp('google.com', 80)
 
 # write to local server
-client = TCPSocket.new('localhost', 4481)
-payload = 'Kolka is cool!' * 10000
+#client = TCPSocket.new('localhost', 4481)
+#payload = 'Kolka is cool!' * 10000
+#
+#begin
+#    loop do
+#        written = client.write_nonblock(payload)
+#        break if written >= payload.size
+#        payload.slice!(0, written)
+#        IO.select(nil, [client])
+#    end
 
-begin
-    loop do
-        written = client.write_nonblock(payload)
-        break if written >= payload.size
-        payload.slice!(0, written)
-        IO.select(nil, [client])
-    end
-
-rescue Errno::EAGAIN
-    IO.select(nil, [client])
-    retry
-end
+#rescue Errno::EAGAIN
+#    IO.select(nil, [client])
+#    retry
+#end
 #client.close
 
 module CloudHash
     class Client
-        class << self
-            attr_accessor :host, :port
+        def initialize(host, port)
+            @connection = TCPSocket.new(host, port)
         end
 
-        def self.get(key)
+        def get(key)
             request "GET #{key}"
         end
 
-        def self.set(key, value)
+        def set(key, value)
             request "SET #{key} #{value}"
         end
 
-        def self.request(string)
-            # create new connection for each operation
-            begin
-                @client = TCPSocket.new(host, port)
-            rescue Errno::ECONNREFUSED
-                puts "Can't reach the server #{host}:#{port}"
-                return
-            end
+        def request(string)
+            msg_length = string.size
+            packed_msg_length = [msg_length].pack('i')
 
-            @client.write(string)
-            # send EOF
-            @client.close_write
-            # get response
-            @client.read
+            @connection.write(packed_msg_length)
+            @connection.write(string)
         end
     end
 end
@@ -75,3 +67,8 @@ end
 # puts CloudHash::Client.get('vp')
 # puts CloudHash::Client.set('kolka', 'Cool!')
 # puts CloudHash::Client.get('kolka')
+
+client = CloudHash::Client.new('localhost', 4481)
+client.set('prez', 'Trumph')
+client.get('prez')
+#client.request('exit')
