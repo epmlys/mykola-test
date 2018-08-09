@@ -148,9 +148,9 @@ class Uppercase(Processor):
 
 
 import sys
-up_conv = Uppercase(open("notes.txt"), sys.stdout)
-print ' ------------ Processing convertation -----'
-up_conv.process()
+#up_conv = Uppercase(open("notes.txt"), sys.stdout)
+#print ' ------------ Processing convertation -----'
+#up_conv.process()
 
 
 # --- pr3 scrapy spider
