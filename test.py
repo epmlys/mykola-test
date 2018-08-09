@@ -213,6 +213,8 @@ urls = [
 import requests
 import re
 
+from concurrent.futures import ThreadPoolExecutor
+
 def download_save(url):
     """ Finds mp3 link, downloads mp3 and saves file to disk."""
     resp = requests.get(url)
@@ -224,3 +226,29 @@ def download_save(url):
     with open(fname, 'wb') as f:
         f.write(resp.content)
         print 'Saved file: {}'.format(fname)
+
+pool = ThreadPoolExecutor(10)
+futures = [pool.submit(download_save, url) for url in urls[:10]]
+
+# bitskins API calls
+import json
+import requests
+import pyotp
+
+api_key = '3689da61-5b46-4bac-9106-4a40795039e2'
+token = pyotp.TOTP('R3DMXUI2B3X2CO2M')
+
+requests.post('https://bitskins.com/api/v1/get_all_item_prices/', data = {'api_key': api_key, 'code': token.now(), 'app_id': 730})
+resp.json()['prices']
+
+# requests.post('https://bitskins.com/api/v1/get_price_data_for_items_on_sale/', data = {'api_key': api_key, 'code': token.now(), 'app_id': 730})
+# resp.json()['data']['items']
+
+requests.post('https://bitskins.com/api/v1/get_steam_price_data/', data = {'api_key': api_key, 'code': token.now(), 'app_id': 730, 'market_hash_name': 'AK-47 | Aquamarine Revenge (Field-Tested)'})
+json.dumps(resp.json(), sort_keys=True, indent=2)
+
+max([float(el['price']) for el in r.json()['data']['raw_data']])
+33.359
+
+min([float(el['price']) for el in r.json()['data']['raw_data']])
+0.2
